@@ -1,0 +1,55 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+}
+/* Sets the default setting for ul */
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0; }
+
+.notesArea {
+  display: flex;
+  flex-direction: column;
+}
+
+.note {
+  padding: 10px;
+  border: 1px solid black;
+  display: flex;
+}
+
+.note.note_displayNone {
+  display: none; }
+
+.tab__btn {
+  width: 33% !important; }
+
+.todo__header {
+  display: flex;
+  justify-content: center;
+  font-size: 4rem;
+  color: #ccc;
+}
+
+.app {
+  display: flex;
+  justify-content: center;
+}
+
+.todo {
+  width:33%;
+}
+
+.option_small {
+  font-size: 0.9rem;
+  border-radius: 0;
+}
+
+.note_done{
+  text-decoration:  line-through;
+  color: #ccc;
+}
+
+/*# sourceMappingURL=toDoFromScss3.css.map */
