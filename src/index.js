@@ -5,14 +5,27 @@ import './bootstrap/css/bootstrap-theme.min.css';
 import './bootstrap/css/bootstrap.min.css';
 import registerServiceWorker from './registerServiceWorker';
 
-const options = ["Pending","Done"];
+const NOTE_STATUS_OPTIONS= ["Pending","Done"];
+
+function isEnterPressed(e){
+    const key = e.which || e.keyCode;
+    return key === 13 ? true : false;
+}
+
+function isValueEmpty(value){
+    return (value && value.trim()) ? false : true;
+}
 
 function TodoInput(props){
 
-    const update = (e) => {
-        var key = e.which || e.keyCode;
-        if(key === 13) {
-            props.add(e.target.value);
+    const update = e => {
+
+        if(isEnterPressed(e)) {
+            let userInput = e.target.value;
+            if(!isValueEmpty(userInput)) {
+                props.add(userInput);
+                e.target.value = "";
+            }
         }
     }
 
@@ -29,8 +42,8 @@ function Tab(props){
         props.changeType(e.target.getAttribute("data-type"));
     }
 
-    const getButtons = () => {
-        const allOptions = ["All",...options];
+    const renderAllButtons = () => {
+        const allOptions = ["All",...NOTE_STATUS_OPTIONS];
         return (
             allOptions.map((type) => {
                 return (
@@ -45,7 +58,7 @@ function Tab(props){
 
     return (
         <div className="btn-group btn-group-justified" >
-            {getButtons()}
+            {renderAllButtons()}
         </div>
     );
 }
@@ -57,12 +70,12 @@ function Notes(props){
             const target = e.target;
             const newType = target.getAttribute("data-type");
             const noteId = parseInt(target.parentNode.parentNode.getAttribute("data-id"));
-            props.changeNoteType(newType,noteId);
+            props.changeNoteType(noteId,newType);
         }
     }
 
-    const getOptionsList = (type) => {
-        return (options).map((option) => {
+    const renderOptionsList = (type) => {
+        return (NOTE_STATUS_OPTIONS).map((option) => {
             const classname = option === type ? "option disabled option_small btn btn-primary col-xs-6" : "option option_small btn btn-primary col-xs-6";
             return(
                 <span key = {option} data-type = {option} className = {classname}>
@@ -72,18 +85,18 @@ function Notes(props){
         });
     }
 
-    const getNoteList = () => {
-        const {notes, currentType} = props;
-        const filteredNotes = currentType === 'All' ? notes : notes.filter((note)=> note.type === currentType);
+    const renderNotes = () => {
+        const {filteredNotes, currentType} = props;
 
         return (filteredNotes).map((note) => {
             return (
                 <li className="note" key = {note.id} data-id = {note.id}>
-                    <span className={(note.type === "Done" && props.currentType === "All") ? "col-xs-8 note_done" : "col-xs-8"}>
+                    <span className={(note.type === "Done" && currentType === "All")
+                                        ? "note__text col-xs-8 note_done" : "note__text col-xs-8"}>
                         {note.text}
                     </span>
                     <span>
-                        {getOptionsList(note.type)}
+                        {renderOptionsList(note.type)}
                     </span>
                 </li>
             );
@@ -91,7 +104,7 @@ function Notes(props){
     }
 
     return (
-        <ul className="notesArea" onClick = {changeNoteType}> {getNoteList()} </ul>
+        <ul className="notesArea" onClick = {changeNoteType}> {renderNotes()} </ul>
     );
 }
 
@@ -107,9 +120,8 @@ class Todo extends React.Component{
 
     addNote = (text) => {
         let newNotes = this.state.notes.slice();
-        const length = newNotes.length;
         newNotes.push({
-            id:length+1,
+            id:Date.now(),
             text,
             type:"Pending"
         });
@@ -122,21 +134,23 @@ class Todo extends React.Component{
         });
     }
 
-    changeNoteType = (newType,id) => {
+    changeNoteType = (id, newType) => {
         const oldNotes = this.state.notes;
         const noteToChange = oldNotes.find((note)=> note.id===id);
+        const index = oldNotes.findIndex((note)=> note.id===id);
         const newNote = Object.assign({},noteToChange,{type:newType});
-        const newState = {notes : [...oldNotes.slice(0,id-1),newNote,...oldNotes.slice(id)]};
+        const newState = {notes : [...oldNotes.slice(0,index),newNote,...oldNotes.slice(index+1)]};
         this.setState(newState);
     }
 
     render(){
         const {notes, currentType} = this.state;
+        const filteredNotes = currentType === 'All' ? notes : notes.filter((note)=> note.type === currentType);
         return(
             <div id = "todo" className="todo container-fluid">
                 <div className="todo__header"> todos </div>
                 <TodoInput placeholder = "Enter note" notes={notes} add = {this.addNote} count = {notes.length}/>
-                <Notes notes={notes} currentType = {currentType} changeNoteType={this.changeNoteType}/>
+                <Notes filteredNotes={filteredNotes} currentType = {currentType} changeNoteType={this.changeNoteType}/>
                 <Tab changeType = {this.changeType} currentType = {currentType}/>
             </div>
         );

@@ -33,6 +33,11 @@ ul {
   color: #ccc;
 }
 
+.note__text{
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .app {
   display: flex;
   justify-content: center;
